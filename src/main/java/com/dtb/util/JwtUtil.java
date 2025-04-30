@@ -3,6 +3,7 @@ package com.dtb.util;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
@@ -13,21 +14,28 @@ import java.util.Map;
 @Component
 public class JwtUtil {
 
-    private static final long EXPIRATION_TIME = 86400000L;
-    private static final String SECRET_KEY = "VmpkR1ZqZzNkR2xrTmpnMk5qWTJNalUzTURrek1UazJNVFU1TlRrek1UVTJNVFU1TlRrM05UVT0=";
+    //private static final long EXPIRATION_TIME = 86400000L;
+    //private static final String SECRET_KEY = "VmpkR1ZqZzNkR2xrTmpnMk5qWTJNalUzTURrek1UazJNVFU1TlRrek1UVTJNVFU1TlRrM05UVT0=";
 
-    public static String generateToken(String subject) {
-        Key key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
+    @Value("${jwt.secret}")
+    private String secret;
+
+    @Value("${jwt.expiration}")
+    private long expirationTime;
+
+    public  String generateToken(String subject) {
+        Key key = Keys.hmacShaKeyFor(secret.getBytes());
 
         Map<String, Object> claims = new HashMap<>();
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(subject)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                .signWith(key, SignatureAlgorithm.HS256) // ✅ CORRECT order
+                .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
+                .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
+
 }
 
 
