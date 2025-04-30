@@ -14,6 +14,22 @@ The system is composed of the following microservices:
 Each service exposes REST APIs and communicates internally via HTTP (could be upgraded to async messaging with RabbitMQ/Kafka).
 
 ### 📊 Architecture Diagram
+graph TD
+A[User] -->|Register| B[Profile Service]
+B -->|Saves Profile| DB1[(Profile DB)]
+
+    B -->|Calls| C[Store of Value Service]
+    C -->|Creates Account<br>Linked to Profile ID| DB2[(Account DB)]
+
+    A -->|Authenticate/Login| E[Authentication Service]
+    E -->|Issues JWT Token| A
+
+    A -->|Initiates Transaction (e.g., Top-up, Withdraw)| D[Payment Service]
+    D -->|Validates JWT<br>via Auth Service| E
+    D -->|Updates Balances| C
+    D -->|Publishes Event| F[Event Service]
+    F -->|Audit Log / Notification| DB3[(Event Log / Notifications DB)]
+
 
 
 ## 🔐 Security Design
@@ -52,5 +68,7 @@ For critical flows like balance deduction + transaction recording:
 
 ```bash
 docker-compose up --build
+
+http://localhost:8085/swagger-ui/index.html#/
 
 
